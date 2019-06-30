@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-
+/**
+ * Represent a Rate
+ */
 const RateSchema = new mongoose.Schema(
   {
     user: {
@@ -22,5 +24,7 @@ const RateSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
+/**
+ * register Rate model
+ */
 mongoose.model("Rate", RateSchema);

@@ -6,7 +6,9 @@ const to = require("../../utils/to");
 const Movie = mongoose.model("Movie");
 const Rate = mongoose.model("Rate");
 
-// GET all movies
+/**
+ * GET all movies (+ average rating)
+ */
 router.get("/", auth.required, async (req, res, next) => {
   const [error, movies] = await to(
     Movie.find({})
@@ -16,6 +18,7 @@ router.get("/", auth.required, async (req, res, next) => {
   );
   if (!movies) return next(error);
 
+  // calculate average rating for each movie
   for (let i = 0; i < movies.length; i++) {
     const movie = movies[i];
     const [err, ratings] = await to(
@@ -24,13 +27,14 @@ router.get("/", auth.required, async (req, res, next) => {
         .lean()
         .exec()
     );
-    // return res.json(ratings);
     movie.averageRating = average(ratings) || 0;
   }
   return res.json(movies);
 });
 
-// add a movie
+/**
+ * Add a movie
+ */
 router.post("/", auth.required, async (req, res, next) => {
   const movie = new Movie();
 
@@ -45,7 +49,9 @@ router.post("/", auth.required, async (req, res, next) => {
   return res.status(200).json({ message: "successfully inserted" });
 });
 
-// update a movie
+/**
+ * Update a movie
+ */
 router.put("/", auth.required, async (req, res, next) => {
   const [error, movie] = await to(Movie.findById(req.body.id));
   if (!movie) return next(error);
@@ -67,7 +73,9 @@ router.put("/", auth.required, async (req, res, next) => {
   res.status(200).json({ message: "successfully updated" });
 });
 
-// DELETE a movie
+/**
+ * DELETE a movie
+ */
 router.delete("/", auth.required, async (req, res, next) => {
   const [error, movie] = await to(Movie.findByIdAndDelete(req.body.id));
   if (!movie) return next(error);
@@ -75,7 +83,9 @@ router.delete("/", auth.required, async (req, res, next) => {
   res.status(200).json({ message: "successfully removed" });
 });
 
-// rate a movie
+/**
+ * rate a movie
+ */
 router.post("/rate", auth.required, async (req, res, next) => {
   const [error, movie] = await to(Movie.findById(req.body.id));
   if (!movie) return next(error);
@@ -85,12 +95,12 @@ router.post("/rate", auth.required, async (req, res, next) => {
   rate.movie = movie.id;
   rate.rating = req.body.rating;
   rate.comment = req.body.comment;
-  // check if user has already rated this movie
+  // has user already rated this movie?
   {
-    const [error, previousRate] = await to(
+    const [, alreadyRated] = await to(
       Rate.findOne({ user: rate.user, movie: rate.movie })
     );
-    if (previousRate) return next({ message: "already rated this movie!" });
+    if (alreadyRated) return next({ message: "already rated this movie!" });
   }
   {
     const [error] = await to(rate.save());
@@ -100,7 +110,13 @@ router.post("/rate", auth.required, async (req, res, next) => {
   }
 });
 
-// returns average of numbers listed in the first parameter(which is an array)
+/**
+ * calculate average of numbers
+ * within given array
+ *
+ * @param {number[]} arrayOfNumbers
+ * @return {number} average
+ */
 const average = arrayOfNumbers =>
   arrayOfNumbers.reduce((total, rating) => total + rating.rating, 0) /
   arrayOfNumbers.length;

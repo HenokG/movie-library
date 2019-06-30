@@ -7,42 +7,51 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 
-// bootstrap our express app
 const app = express();
 
 app.use(logger("dev"));
-// use body-parser for parsing request data
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-// enable cors for valid communication between our web-client(React) and our server(Express)
+/**
+ * enable CORS for valid communication between server and client
+ */
 app.use(cors());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-mongoose.connect("mongodb://localhost/mytvbox", {
+/**
+ * connect to mongodb database named 'movie-library'
+ */
+mongoose.connect("mongodb://localhost/movie-library", {
   useNewUrlParser: true,
   useCreateIndex: true
 });
 
 require("./models/User");
-require("./config/passport");
-require("./models/Rate");
 require("./models/Movie");
+require("./models/Rate");
+require("./config/passport");
 
 const usersRouter = require("./routes/api/users");
 const moviesRouter = require("./routes/api/movies");
 
+/**
+ * setup router
+ */
 app.use("/users", usersRouter);
 app.use("/movies", moviesRouter);
 
-// catch 404 and forward to error handler
+/**
+ * catch 404 and forward to error handler
+ */
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.log(err.stack);
+  // console.log(err.stack);
   res.status(err.status || 500);
 
   res.json({

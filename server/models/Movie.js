@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
-
+/**
+ * Represent a Movie
+ */
 const MovieSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -15,8 +17,7 @@ const MovieSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-MovieSchema.methods.toJSONFor = () => {
-  return { hi: "hi" };
-};
-
+/**
+ * register Movie model
+ */
 mongoose.model("Movie", MovieSchema);

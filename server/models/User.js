@@ -3,7 +3,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const to = require("../utils/to");
 const secret = require("../config").secret;
-
+/**
+ * Represent a User
+ */
 var UserSchema = new mongoose.Schema(
   {
     username: {
@@ -30,16 +32,34 @@ var UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+/**
+ * validate given password against password stored in current
+ * user object using bcrypt's compare function
+ * @param {string} password
+ * @returns {boolean} validating if a match is detected
+ */
 UserSchema.methods.validPassword = async function(password) {
   const [error, isValid] = await to(bcrypt.compare(password, this.password));
   if (error || !isValid) return false;
   return true;
 };
 
+/**
+ * set password to current user object after
+ * encrypting it with bcrypt
+ *
+ * @param {string} password
+ */
 UserSchema.methods.setPassword = async function(password) {
   this.password = await bcrypt.hash(password, 10);
 };
 
+/**
+ * generate json web token for
+ * current user object
+ *
+ * @returns {string} signed token
+ */
 UserSchema.methods.generateJWT = function() {
   var today = new Date();
   var exp = new Date(today);
@@ -56,59 +76,19 @@ UserSchema.methods.generateJWT = function() {
   return token;
 };
 
+/**
+ * convert user object's selected properties to
+ * authentication json
+ *
+ * @returns {object} containing signed token and username
+ */
 UserSchema.methods.toAuthJSON = function() {
   return {
     username: this.username,
     token: this.generateJWT()
   };
 };
-
-// UserSchema.methods.toProfileJSONFor = function(user) {
-//   return {
-//     username: this.username,
-//     bio: this.bio,
-//     image:
-//       this.image || "https://static.productionready.io/images/smiley-cyrus.jpg",
-//     following: user ? user.isFollowing(this._id) : false
-//   };
-// };
-
-// UserSchema.methods.favorite = function(id) {
-//   if (this.favorites.indexOf(id) === -1) {
-//     this.favorites.push(id);
-//   }
-
-//   return this.save();
-// };
-
-// UserSchema.methods.unfavorite = function(id) {
-//   this.favorites.remove(id);
-//   return this.save();
-// };
-
-// UserSchema.methods.isFavorite = function(id) {
-//   return this.favorites.some(function(favoriteId) {
-//     return favoriteId.toString() === id.toString();
-//   });
-// };
-
-// UserSchema.methods.follow = function(id) {
-//   if (this.following.indexOf(id) === -1) {
-//     this.following.push(id);
-//   }
-
-//   return this.save();
-// };
-
-// UserSchema.methods.unfollow = function(id) {
-//   this.following.remove(id);
-//   return this.save();
-// };
-
-// UserSchema.methods.isFollowing = function(id) {
-//   return this.following.some(function(followId) {
-//     return followId.toString() === id.toString();
-//   });
-// };
-
+/**
+ * register User model
+ */
 mongoose.model("User", UserSchema);

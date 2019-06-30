@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "test-init": "node ./node_modules/jasmine/bin/jasmine.js init",
+    "test": "node ./node_modules/jasmine/bin/jasmine.js"
   },
   "dependencies": {
     "bcrypt": "^3.0.6",
@@ -24,7 +26,7 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "jasmine": "^3.4.0",
+    "jasmine": "^3.1.0",
     "nodemon": "^1.19.1"
   }
 }

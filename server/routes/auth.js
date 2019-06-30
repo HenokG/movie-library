@@ -1,9 +1,14 @@
 var jwt = require("express-jwt");
 var secret = require("../config").secret;
 
-function getTokenFromHeader(req) {
-  return req.header("token");
-}
+/**
+ * retrieve authentication token
+ * from header
+ *
+ * @param {string} req
+ * @return {string} token plucked from header
+ */
+const getTokenFromHeader = req => req.header("token");
 
 var auth = {
   required: jwt({
