@@ -31,7 +31,7 @@ export default class ModalNotification extends Component {
 
   render() {
     return (
-      <Modal show={this.state.show}>
+      <Modal show={this.state.show} onHide={this.handleNotificationToggle}>
         <Modal.Header closeButton>
           <Modal.Title>{this.state.title}</Modal.Title>
         </Modal.Header>

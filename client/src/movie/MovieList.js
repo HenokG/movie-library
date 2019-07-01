@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Movie from "./Movie";
 import MovieModal from "./MovieModal";
+import socketIOClient from "socket.io-client";
 
 class MovieList extends Component {
   constructor() {
@@ -24,12 +25,12 @@ class MovieList extends Component {
     };
   }
 
-  componentDidUpdate() {}
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.movies !== this.props.movies) {
       this.setState({ movies: nextProps.movies }, () => {
         this.handleSort();
+        const socket = socketIOClient("http://localhost:3000");
+        socket.on("fromAPI", data => alert(data));
       });
     }
   }

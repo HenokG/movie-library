@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const auth = require("../auth");
 const to = require("../../utils/to");
+const socketApi = require("../../utils/socketApi");
 const Movie = mongoose.model("Movie");
 const Rate = mongoose.model("Rate");
 const User = mongoose.model("User");
@@ -94,6 +95,8 @@ router.post("/share", auth.required, async (req, res, next) => {
     const [error] = await to(movie.save());
     if (error) return next(error);
 
+    socketApi.send({ message: "Movie Rated!" });
+
     res.status(200).json({ message: "successfully shared" });
   }
 });
@@ -167,7 +170,6 @@ const getMovies = async ({ filter, req, next }) => {
         comment: rating.comment,
         username: user.username
       });
-      console.log("hi");
     }
 
     movie.reviews = reviews;
