@@ -6,6 +6,11 @@ import { LinkContainer } from "react-router-bootstrap";
 import Auth from "../authentication/Auth";
 
 class Header extends React.Component {
+  logout() {
+    localStorage.removeItem("loggedInUser");
+    window.location.reload();
+  }
+
   render() {
     let navItems;
     if (Auth.isAuthenticated()) {
@@ -17,6 +22,9 @@ class Header extends React.Component {
           <LinkContainer to="/shared">
             <Nav.Link>Shared</Nav.Link>
           </LinkContainer>
+          <Nav.Link className="ml-auto" onClick={this.logout}>
+            Log Out
+          </Nav.Link>
         </Nav>
       );
     } else {

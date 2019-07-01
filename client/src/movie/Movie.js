@@ -6,23 +6,33 @@ import ListGroup from "react-bootstrap/ListGroup";
 import StarRatingComponent from "react-star-rating-component";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Form from "react-bootstrap/Form";
 import customAxios from "../utils/custom-axios";
+import { withRouter } from "react-router-dom";
 import to from "../utils/to";
 import ModalNotification from "../partials/ModalNotification";
+import MovieModal from "./MovieModal";
 import Badge from "react-bootstrap/Badge";
+import Table from "react-bootstrap/Table";
+import Accordion from "react-bootstrap/Accordion";
 
 export class Movie extends Component {
   constructor() {
     super();
 
-    this.modalNotification = React.createRef();
+    this.movieModal = React.createRef();
+
+    this.modalShareNotification = React.createRef();
     this.modalRateNotification = React.createRef();
 
     this.handleModalToggle = this.handleModalToggle.bind(this);
     this.handleCommentChange = this.handleCommentChange.bind(this);
     this.handleSubmitRating = this.handleSubmitRating.bind(this);
     this.handleShare = this.handleShare.bind(this);
+
+    this.handleEditClick = this.handleEditClick.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
 
     this.state = {
       showRatingModal: false,
@@ -40,6 +50,20 @@ export class Movie extends Component {
 
   handleStarRatingChange(nextValue) {
     this.setState({ rate: nextValue });
+  }
+
+  handleEditClick() {
+    this.movieModal.current.setTitle({
+      title: `Edit ${this.props.movie.title}`
+    });
+    this.movieModal.current.openEditModal(this.props.movie._id);
+  }
+
+  handleDeleteClick() {
+    this.movieModal.current.setTitle({
+      title: `Delete ${this.props.movie.title} ?`
+    });
+    this.movieModal.current.openDeleteModal(this.props.movie._id);
   }
 
   async handleSubmitRating() {
@@ -69,14 +93,14 @@ export class Movie extends Component {
     if (error) return this.setState({ error: "invalid operation" });
 
     if (response.status === 200) {
-      this.modalNotification.current.handleNotificationToggle();
-      this.props.history.push("/shared");
+      this.modalShareNotification.current.handleNotificationToggle();
     }
   }
 
   render() {
-    const rateButtonClass = this.props.movie.previouslyRated ? "disabled" : "";
-
+    const releaseDateFormatted = this.props.movie.releaseDate
+      ? new Date(this.props.movie.releaseDate).toDateString()
+      : "N/A";
     return (
       <div className="ml-5 mt-3">
         <Card style={{ width: "18rem" }}>
@@ -87,9 +111,7 @@ export class Movie extends Component {
             <Card.Text>Staring: {this.props.movie.actors}</Card.Text>
           </Card.Body>
           <ListGroup className="list-group-flush">
-            <ListGroupItem>
-              {`Release Date: ${this.props.movie.releaseDate}`}
-            </ListGroupItem>
+            <ListGroupItem>Release Date: {releaseDateFormatted}</ListGroupItem>
             <ListGroupItem>
               Duration: {this.props.movie.duration} hrs
             </ListGroupItem>
@@ -103,22 +125,58 @@ export class Movie extends Component {
           <Card.Body>
             <Card.Subtitle className="mb-2 text-muted" />
             <Card.Subtitle className="mb-2 text-muted" />
-            <Card.Link
-              href="#"
-              className={`btn btn-primary ${rateButtonClass}`}
-              onClick={this.handleModalToggle}
+            <ButtonGroup
+              className="d-flex justify-content-center"
+              aria-label="First group"
             >
-              Rate
-            </Card.Link>
-            <Card.Link
-              href="#"
-              className="btn btn-primary"
-              onClick={this.handleShare}
-            >
-              Share
-            </Card.Link>
+              <Button
+                className="btn-sm"
+                disabled={this.props.movie.previouslyRated}
+                onClick={this.handleModalToggle}
+              >
+                Rate
+              </Button>
+              <Button className="btn-sm" onClick={this.handleShare}>
+                Share
+              </Button>
+              <Button className="btn-sm" onClick={this.handleEditClick}>
+                Edit
+              </Button>
+              <Button className="btn-sm" onClick={this.handleDeleteClick}>
+                Delete
+              </Button>
+            </ButtonGroup>
+
+            {/* user reviews */}
+
+            <Accordion className="mt-4">
+              <Accordion.Toggle as={Button} variant="link" eventKey="0">
+                Reviews
+              </Accordion.Toggle>
+              <Accordion.Collapse eventKey="0">
+                <Card.Body>
+                  {this.props.movie.reviews &&
+                    this.props.movie.reviews.map(review => {
+                      return (
+                        <>
+                          <p className="font-weight-bold">@{review.username}</p>
+                          <StarRatingComponent
+                            name="r"
+                            value={review.rating}
+                            editing={false}
+                          />
+                          <p>{review.comment}</p>
+                          <hr />
+                        </>
+                      );
+                    })}
+                </Card.Body>
+              </Accordion.Collapse>
+            </Accordion>
           </Card.Body>
         </Card>
+
+        {/* modals */}
 
         <Modal
           show={this.state.showRatingModal}
@@ -150,11 +208,14 @@ export class Movie extends Component {
           </Modal.Footer>
         </Modal>
 
-        <ModalNotification title="Shared" ref={this.modalNotification} />
+        {/* <MovieModal ref={this.movieModal} movie={{}} /> */}
+        <MovieModal ref={this.movieModal} movie={this.props.movie} />
+
+        <ModalNotification title="Shared" ref={this.modalShareNotification} />
         <ModalNotification title="Rated" ref={this.modalRateNotification} />
       </div>
     );
   }
 }
 
-export default Movie;
+export default withRouter(Movie);

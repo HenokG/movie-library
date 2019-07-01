@@ -10,21 +10,30 @@ import customAxios from "../utils/custom-axios";
 import to from "../utils/to";
 
 export default class MovieModal extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.notification = React.createRef();
 
     this.handleToggle = this.handleToggle.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleAddSubmit = this.handleAddSubmit.bind(this);
-    this.handleEditSubmit = this.handleEditSubmit.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.setTitle = this.setTitle.bind(this);
 
     this.state = {
+      modalTitle: "",
       show: false,
-      error: null
+      method: "POST",
+      error: null,
+      title: props.movie.title,
+      duration: props.movie.duration,
+      releaseDate: props.movie.releaseDate,
+      actors: props.movie.actors
     };
+  }
+
+  setTitle({ title }) {
+    this.setState({ modalTitle: title });
   }
 
   handleInputChange(event) {
@@ -37,54 +46,71 @@ export default class MovieModal extends Component {
     this.setState({ show: !this.state.show });
   }
 
-  handleAddSubmit() {
-    this.handleSubmit({ method: "POST" });
+  openAddModal() {
+    this.setState({ method: "POST" });
+    this.handleToggle();
   }
 
-  handleEditSubmit() {
-    this.handleSubmit({ method: "PUT" });
+  openEditModal(id) {
+    this.setState({ method: "PUT" });
+    this.handleToggle();
+    this.setState({ id: id });
+    this.notification.current.setTitle({ title: "Edited" });
   }
 
-  async handleSubmit({ method }) {
-    switch (method) {
+  openDeleteModal(id) {
+    this.setState({ method: "DELETE" });
+    this.handleToggle();
+    this.setState({ id: id });
+    this.notification.current.setTitle({ title: "Deleted" });
+  }
+
+  handleDeleteSubmit() {
+    this.handleSubmit();
+  }
+
+  async handleSubmit() {
+    let error, response;
+    switch (this.state.method) {
       case "POST":
-        const [error, response] = await to(
-          customAxios.post("/movies", this.state)
-        );
+        [error, response] = await to(customAxios.post("/movies", this.state));
         break;
       case "PUT":
-        const [error, response] = await to(
-          customAxios.put("/movies", this.state)
-        );
+        [error, response] = await to(customAxios.put("/movies", this.state));
         break;
       default:
-        const [error, response] = await to(
-          customAxios.delete("/movies", this.state)
-        );
+        [error, response] = await to(customAxios.patch("/movies", this.state));
     }
     if (error)
       return this.setState({
         error: "operation failed"
       });
 
-    this.setState({ showAddMovieModal: false });
+    this.setState({ show: false });
 
-    if (response.status === 200)
-      this.movieAddedNotification.current.handleNotificationToggle();
+    if (response.status === 200) {
+      this.notification.current.handleNotificationToggle();
+    }
   }
 
   render() {
+    const releaseDateForInput = this.state.releaseDate
+      ? this.state.releaseDate.substr(0, 10)
+      : undefined;
     return (
       <>
-        <Modal show={this.state.show} onHide={this.toggle}>
+        <Modal show={this.state.show} onHide={this.handleToggle}>
           <Modal.Header closeButton>
-            <Modal.Title>Add a Movie</Modal.Title>
+            <Modal.Title>{this.state.modalTitle}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body
+            className={this.state.method === "DELETE" ? "d-none" : ""}
+          >
             <Form.Label>Title</Form.Label>
             <Form.Control
               type="text"
               name="title"
+              value={this.state.title}
               onChange={this.handleInputChange}
               placeholder="Title"
               className="mb-2"
@@ -95,6 +121,7 @@ export default class MovieModal extends Component {
               type="number"
               step="0.01"
               name="duration"
+              value={this.state.duration}
               onChange={this.handleInputChange}
               placeholder="Duration in hours (ex. 2.30)"
               className="mb-2"
@@ -104,6 +131,7 @@ export default class MovieModal extends Component {
             <Form.Control
               type="date"
               name="releaseDate"
+              value={releaseDateForInput}
               onChange={this.handleInputChange}
               className="mb-2"
             />
@@ -112,6 +140,7 @@ export default class MovieModal extends Component {
             <Form.Control
               type="text"
               name="actors"
+              value={this.state.actors}
               onChange={this.handleInputChange}
               placeholder="Actors separated by comma (ex. Evans, RDJ)"
               className="mb-2"
@@ -120,8 +149,11 @@ export default class MovieModal extends Component {
             <div className="text-danger mb-2">{this.state.error}</div>
           </Modal.Body>
           <Modal.Footer className="justify-content-center">
-            <Button variant="primary" onClick={this.handleMovieSubmit}>
-              Submit
+            <Button
+              variant={this.state.method === "DELETE" ? "danger" : "primary"}
+              onClick={this.handleSubmit}
+            >
+              Save
             </Button>
           </Modal.Footer>
         </Modal>

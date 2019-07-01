@@ -5,6 +5,7 @@ const auth = require("../auth");
 const to = require("../../utils/to");
 const Movie = mongoose.model("Movie");
 const Rate = mongoose.model("Rate");
+const User = mongoose.model("User");
 
 /**
  * GET all movies (+ average rating)
@@ -72,7 +73,9 @@ router.put("/", auth.required, async (req, res, next) => {
 /**
  * DELETE a movie
  */
-router.delete("/", auth.required, async (req, res, next) => {
+router.patch("/", auth.required, async (req, res, next) => {
+  console.log(`-----------${req.body.id}`);
+
   const [error, movie] = await to(Movie.findByIdAndDelete(req.body.id));
   if (!movie) return next(error);
 
@@ -152,17 +155,27 @@ const getMovies = async ({ filter, req, next }) => {
   // calculate average rating for each movie
   for (let i = 0; i < movies.length; i++) {
     const movie = movies[i];
-    const [, ratings] = await to(
-      Rate.find({ movie: movie._id })
-        .select("rating -_id")
-        .lean()
-        .exec()
-    );
+    const [, ratings] = await to(Rate.find({ movie: movie._id }));
+
+    const reviews = [];
+    for (let i = 0; i < ratings.length; i++) {
+      const rating = ratings[i];
+      const [err, user] = await to(User.findById(rating.user));
+      if (!user) continue;
+      reviews.push({
+        rating: rating.rating,
+        comment: rating.comment,
+        username: user.username
+      });
+      console.log("hi");
+    }
+
+    movie.reviews = reviews;
+
     // already rated this movie?
-    const [, previouslyRated] = await to(
-      Rate.find({ movie: movie._id, user: req.user.id })
-    );
-    if (previouslyRated.length > 0) movie.previouslyRated = true;
+    const alreadyRated = ratings.filter(rating => rating.user == req.user.id);
+    if (alreadyRated.length > 0) movie.previouslyRated = true;
+
     movie.averageRating = average(ratings) || 0;
   }
   return new Promise((resolve, reject) => {
