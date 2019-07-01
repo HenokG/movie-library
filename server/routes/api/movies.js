@@ -10,25 +10,21 @@ const Rate = mongoose.model("Rate");
  * GET all movies (+ average rating)
  */
 router.get("/", auth.required, async (req, res, next) => {
-  const [error, movies] = await to(
-    Movie.find({})
-      .select("-ratings -__v")
-      .lean()
-      .exec()
-  );
-  if (!movies) return next(error);
+  const [, movies] = await to(getMovies({ req: req, next: next }));
+  return res.json(movies);
+});
 
-  // calculate average rating for each movie
-  for (let i = 0; i < movies.length; i++) {
-    const movie = movies[i];
-    const [err, ratings] = await to(
-      Rate.find({ movie: movie._id })
-        .select("rating -_id")
-        .lean()
-        .exec()
-    );
-    movie.averageRating = average(ratings) || 0;
-  }
+/**
+ * GET shared movies (+ average rating)
+ */
+router.get("/shared", auth.required, async (req, res, next) => {
+  const [, movies] = await to(
+    getMovies({
+      filter: { shared: { $exists: true } },
+      req: req,
+      next: next
+    })
+  );
   return res.json(movies);
 });
 
@@ -84,6 +80,22 @@ router.delete("/", auth.required, async (req, res, next) => {
 });
 
 /**
+ * share a movie
+ */
+router.post("/share", auth.required, async (req, res, next) => {
+  const [error, movie] = await to(Movie.findById(req.body.id));
+  if (!movie) return next(error);
+
+  movie.shared = req.user.id;
+  {
+    const [error] = await to(movie.save());
+    if (error) return next(error);
+
+    res.status(200).json({ message: "successfully shared" });
+  }
+});
+
+/**
  * rate a movie
  */
 router.post("/rate", auth.required, async (req, res, next) => {
@@ -120,5 +132,42 @@ router.post("/rate", auth.required, async (req, res, next) => {
 const average = arrayOfNumbers =>
   arrayOfNumbers.reduce((total, rating) => total + rating.rating, 0) /
   arrayOfNumbers.length;
+
+/**
+ * retreive movies list from database and filter
+ * by given argument if any
+ *
+ * @param {object} filter
+ * @returns {object[]} list of movies either filtered nor unfiltered
+ */
+const getMovies = async ({ filter, req, next }) => {
+  const [error, movies] = await to(
+    Movie.find(filter || {})
+      .select("-ratings -__v")
+      .lean()
+      .exec()
+  );
+  if (!movies) return next(error);
+
+  // calculate average rating for each movie
+  for (let i = 0; i < movies.length; i++) {
+    const movie = movies[i];
+    const [, ratings] = await to(
+      Rate.find({ movie: movie._id })
+        .select("rating -_id")
+        .lean()
+        .exec()
+    );
+    // already rated this movie?
+    const [, previouslyRated] = await to(
+      Rate.find({ movie: movie._id, user: req.user.id })
+    );
+    if (previouslyRated.length > 0) movie.previouslyRated = true;
+    movie.averageRating = average(ratings) || 0;
+  }
+  return new Promise((resolve, reject) => {
+    resolve(movies);
+  });
+};
 
 module.exports = router;

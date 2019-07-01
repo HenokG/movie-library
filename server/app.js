@@ -39,8 +39,8 @@ const moviesRouter = require("./routes/api/movies");
 /**
  * setup router
  */
-app.use("/users", usersRouter);
-app.use("/movies", moviesRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/movies", moviesRouter);
 
 /**
  * catch 404 and forward to error handler
@@ -52,7 +52,7 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // console.log(err.stack);
-  res.status(err.status || 500);
+  res.status(err.status || 400);
 
   res.json({
     errors: {

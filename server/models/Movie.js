@@ -12,7 +12,8 @@ const MovieSchema = new mongoose.Schema(
     },
     releaseDate: Date,
     duration: Number,
-    actors: Array
+    actors: Array,
+    shared: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
   },
   { timestamps: true }
 );
