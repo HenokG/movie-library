@@ -196,7 +196,7 @@ class MovieModal extends Component {
               variant={this.state.method === "DELETE" ? "danger" : "primary"}
               onClick={this.handleSubmit}
             >
-              Save
+              Confirm
             </Button>
           </Modal.Footer>
         </Modal>

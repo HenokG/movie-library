@@ -1,3 +1,4 @@
 export default class Config {
-  static API_URL = "http://localhost:3000/api";
+    static BASE_URL = "http://localhost:3000";
+    static API_URL = `${Config.BASE_URL}/api`;
 }

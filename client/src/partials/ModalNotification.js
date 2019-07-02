@@ -56,7 +56,7 @@ class ModalNotification extends Component {
    */
   done() {
     this.setState({ show: !this.state.show });
-    window.location.reload();
+    // window.location.reload();
   }
 
   render() {

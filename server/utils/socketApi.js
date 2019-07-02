@@ -5,11 +5,18 @@ var socketApi = {};
 socketApi.io = io;
 
 io.on("connection", function(socket) {
-  console.log("A new user connected");
+  console.log("New Client Connected");
+  socket.on("disconnect", () => {
+    console.log("Client Disconnected");
+  });
 });
 
-socketApi.send = function(data) {
-  io.sockets.emit("fromAPI", data);
+socketApi.sendForSharedMovies = function(data) {
+  io.sockets.emit("fromAPIUpdateSharedMovies", data);
+};
+
+socketApi.sendForAllMovies = function(data) {
+  io.sockets.emit("fromAPIUpdateAllMovies", data);
 };
 
 module.exports = socketApi;

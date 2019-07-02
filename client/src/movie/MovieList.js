@@ -5,7 +5,7 @@ import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
 import Movie from "./Movie";
 import MovieModal from "./MovieModal";
-import socketIOClient from "socket.io-client";
+
 
 /**
  * MovieList component for rendering a list of movies
@@ -44,10 +44,12 @@ class MovieList extends Component {
     if (nextProps.movies !== this.props.movies) {
       this.setState({ movies: nextProps.movies }, () => {
         this.handleSort();
-        const socket = socketIOClient("http://localhost:3000");
-        socket.on("fromAPI", data => alert(data));
       });
     }
+  }
+
+  updateMovies({ movies }) {
+      this.setState({ movies: movies });
   }
 
   /**

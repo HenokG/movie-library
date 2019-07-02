@@ -44,7 +44,17 @@ router.post("/", auth.required, async (req, res, next) => {
   const [err] = await to(movie.save());
 
   if (err) return next(err);
-  return res.status(200).json({ message: "successfully inserted" });
+
+  // push notification to users for live feedback
+  sendUpdateToUsers({
+    messageToUsers: `${movie.title} has been Added!`,
+    req: req,
+    next: next
+  });
+
+  return res.status(200).json({
+    message: "successfully inserted"
+  });
 });
 
 /**
@@ -68,19 +78,35 @@ router.put("/", auth.required, async (req, res, next) => {
   }
   movie.save();
 
-  res.status(200).json({ message: "successfully updated" });
+  // push notification to users for live feedback
+  sendUpdateToUsers({
+    messageToUsers: `${movie.title} has been Updated!`,
+    req: req,
+    next: next
+  });
+
+  res.status(200).json({
+    message: "successfully updated"
+  });
 });
 
 /**
  * DELETE a movie
  */
 router.patch("/", auth.required, async (req, res, next) => {
-  console.log(`-----------${req.body.id}`);
-
   const [error, movie] = await to(Movie.findByIdAndDelete(req.body.id));
   if (!movie) return next(error);
 
-  res.status(200).json({ message: "successfully removed" });
+  // push notification to users for live feedback
+  sendUpdateToUsers({
+    messageToUsers: `${movie.title} has been Deleted!`,
+    req: req,
+    next: next
+  });
+
+  res.status(200).json({
+    message: "successfully removed"
+  });
 });
 
 /**
@@ -95,7 +121,12 @@ router.post("/share", auth.required, async (req, res, next) => {
     const [error] = await to(movie.save());
     if (error) return next(error);
 
-    socketApi.send({ message: "Movie Rated!" });
+    // push notification to users for live feedback
+    sendUpdateToUsers({
+      messageToUsers: `${movie.title} has been Shared!`,
+      req: req,
+      next: next
+    });
 
     res.status(200).json({ message: "successfully shared" });
   }
@@ -123,6 +154,13 @@ router.post("/rate", auth.required, async (req, res, next) => {
   {
     const [error] = await to(rate.save());
     if (error) return next(error);
+
+    // push notification to users for live feedback
+    sendUpdateToUsers({
+      messageToUsers: `${movie.title} has been Rated!`,
+      req: req,
+      next: next
+    });
 
     res.status(200).json({ message: "successfully rated" });
   }
@@ -182,6 +220,19 @@ const getMovies = async ({ filter, req, next }) => {
   }
   return new Promise((resolve, reject) => {
     resolve(movies);
+  });
+};
+
+const sendUpdateToUsers = async ({ messageToUsers, req, next }) => {
+  const [, allMovies] = await to(getMovies({ req: req, next: next }));
+
+  socketApi.sendForAllMovies({ message: messageToUsers, data: allMovies });
+
+  const sharedMovies = allMovies.filter(movie => movie.shared);
+
+  socketApi.sendForSharedMovies({
+    message: messageToUsers,
+    data: sharedMovies
   });
 };
 
