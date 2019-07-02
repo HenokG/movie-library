@@ -14,6 +14,20 @@ import {
   BrowserRouter as Router
 } from "react-router-dom";
 
+/**
+ * Custom component which provides easy route definition for private/protected
+ * routes(ex. /shared).
+ *
+ * Every property/attribute is passed down to Route if authenticated, if not
+ * then redirect to /login.
+ *
+ * this component allows us to not have a wrapper component which gets rendered
+ * every time so we can protect our routes, it simply allowws us to have a
+ * private route component
+ *
+ * @param {*} { component: Component, ...rest }
+ */
+
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}

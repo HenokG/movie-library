@@ -14,10 +14,19 @@ import to from "../utils/to";
 import ModalNotification from "../partials/ModalNotification";
 import MovieModal from "./MovieModal";
 import Badge from "react-bootstrap/Badge";
-import Table from "react-bootstrap/Table";
 import Accordion from "react-bootstrap/Accordion";
 
-export class Movie extends Component {
+/**
+ * Movie component to render a single movie
+ *
+ * @class Movie
+ * @extends {Component}
+ */
+class Movie extends Component {
+  /**
+   *Creates an instance of Movie.
+   * @memberof Movie
+   */
   constructor() {
     super();
 
@@ -26,7 +35,7 @@ export class Movie extends Component {
     this.modalShareNotification = React.createRef();
     this.modalRateNotification = React.createRef();
 
-    this.handleModalToggle = this.handleModalToggle.bind(this);
+    this.handleRatingModalToggle = this.handleRatingModalToggle.bind(this);
     this.handleCommentChange = this.handleCommentChange.bind(this);
     this.handleSubmitRating = this.handleSubmitRating.bind(this);
     this.handleShare = this.handleShare.bind(this);
@@ -40,7 +49,12 @@ export class Movie extends Component {
     };
   }
 
-  handleModalToggle() {
+  /**
+   * toggle movie rating modal
+   *
+   * @memberof Movie
+   */
+  handleRatingModalToggle() {
     this.setState({ showRatingModal: !this.state.showRatingModal });
   }
 
@@ -52,6 +66,14 @@ export class Movie extends Component {
     this.setState({ rate: nextValue });
   }
 
+  /**
+   * called when user clicks edit for a movie
+   * which sets the title of the modal to
+   * edit + movieTitle and opens the
+   * edit modal
+   *
+   * @memberof Movie
+   */
   handleEditClick() {
     this.movieModal.current.setTitle({
       title: `Edit ${this.props.movie.title}`
@@ -59,6 +81,14 @@ export class Movie extends Component {
     this.movieModal.current.openEditModal(this.props.movie._id);
   }
 
+  /**
+   * used to handle deletion of a movie
+   *
+   * sets title to delete + movieTitle ?
+   * then opens confirmation modal
+   *
+   * @memberof Movie
+   */
   handleDeleteClick() {
     this.movieModal.current.setTitle({
       title: `Delete ${this.props.movie.title} ?`
@@ -66,6 +96,15 @@ export class Movie extends Component {
     this.movieModal.current.openDeleteModal(this.props.movie._id);
   }
 
+  /**
+   * asynchronously submit user review
+   * including comment
+   *
+   * if server response if OK
+   * show notification
+   *
+   * @memberof Movie
+   */
   async handleSubmitRating() {
     const [error, response] = await to(
       customAxios.post(`/movies/rate`, {
@@ -83,6 +122,13 @@ export class Movie extends Component {
       this.modalRateNotification.current.handleNotificationToggle();
   }
 
+  /**
+   * asynchronously submit user share request
+   * and show notification if response
+   * from server is ok
+   *
+   * @memberof Movie
+   */
   async handleShare() {
     const [error, response] = await to(
       customAxios.post(`/movies/share`, {
@@ -92,12 +138,12 @@ export class Movie extends Component {
 
     if (error) return this.setState({ error: "invalid operation" });
 
-    if (response.status === 200) {
+    if (response.status === 200)
       this.modalShareNotification.current.handleNotificationToggle();
-    }
   }
 
   render() {
+    // release date shall be formatted to human readable date
     const releaseDateFormatted = this.props.movie.releaseDate
       ? new Date(this.props.movie.releaseDate).toDateString()
       : "N/A";
@@ -132,7 +178,7 @@ export class Movie extends Component {
               <Button
                 className="btn-sm"
                 disabled={this.props.movie.previouslyRated}
-                onClick={this.handleModalToggle}
+                onClick={this.handleRatingModalToggle}
               >
                 Rate
               </Button>
@@ -180,7 +226,7 @@ export class Movie extends Component {
 
         <Modal
           show={this.state.showRatingModal}
-          onHide={this.handleModalToggle}
+          onHide={this.handleRatingModalToggle}
         >
           <Modal.Header closeButton>
             <Modal.Title>Rate {this.props.movie.title}</Modal.Title>

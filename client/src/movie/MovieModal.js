@@ -1,15 +1,23 @@
 import React, { Component } from "react";
 import ModalNotification from "../partials/ModalNotification";
 import Form from "react-bootstrap/Form";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
-import Movie from "./Movie";
 import Modal from "react-bootstrap/Modal";
 import customAxios from "../utils/custom-axios";
 import to from "../utils/to";
 
-export default class MovieModal extends Component {
+/**
+ * MovieModal component for editing/adding/deleting a movie
+ *
+ * @class MovieModal
+ * @extends {Component}
+ */
+class MovieModal extends Component {
+  /**
+   * Creates an instance of MovieModal.
+   * @param {*} props
+   * @memberof MovieModal
+   */
   constructor(props) {
     super(props);
 
@@ -32,6 +40,13 @@ export default class MovieModal extends Component {
     };
   }
 
+  /**
+   * set title of the modal which depends
+   * on the called state
+   *
+   * @param {*} { title }
+   * @memberof MovieModal
+   */
   setTitle({ title }) {
     this.setState({ modalTitle: title });
   }
@@ -42,15 +57,33 @@ export default class MovieModal extends Component {
     });
   }
 
+  /**
+   * toggle movie modal
+   *
+   * @memberof MovieModal
+   */
   handleToggle() {
     this.setState({ show: !this.state.show });
   }
 
+  /**
+   * show the modal for adding a new movie
+   *
+   * @memberof MovieModal
+   */
   openAddModal() {
     this.setState({ method: "POST" });
     this.handleToggle();
   }
 
+  /**
+   * show the modal for editing a movie
+   *
+   * set notification's title to 'Edited'
+   *
+   * @param {string} id
+   * @memberof MovieModal
+   */
   openEditModal(id) {
     this.setState({ method: "PUT" });
     this.handleToggle();
@@ -58,6 +91,14 @@ export default class MovieModal extends Component {
     this.notification.current.setTitle({ title: "Edited" });
   }
 
+  /**
+   * show the modal for deleting a movie
+   *
+   *set notification's title to Deleted
+   *
+   * @param {*} id
+   * @memberof MovieModal
+   */
   openDeleteModal(id) {
     this.setState({ method: "DELETE" });
     this.handleToggle();
@@ -65,10 +106,11 @@ export default class MovieModal extends Component {
     this.notification.current.setTitle({ title: "Deleted" });
   }
 
-  handleDeleteSubmit() {
-    this.handleSubmit();
-  }
-
+  /**
+   * asynchronously submit user action to server
+   *
+   * @memberof MovieModal
+   */
   async handleSubmit() {
     let error, response;
     switch (this.state.method) {
@@ -94,6 +136,7 @@ export default class MovieModal extends Component {
   }
 
   render() {
+    // format release date for input's value
     const releaseDateForInput = this.state.releaseDate
       ? this.state.releaseDate.substr(0, 10)
       : undefined;
@@ -163,3 +206,5 @@ export default class MovieModal extends Component {
     );
   }
 }
+
+export default MovieModal;

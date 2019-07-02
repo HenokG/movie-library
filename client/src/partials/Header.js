@@ -1,11 +1,26 @@
 import React from "react";
-import "./Header.css";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import { LinkContainer } from "react-router-bootstrap";
 import Auth from "../authentication/Auth";
 
+/**
+ * Header component for rendering the header
+ * of the entire app
+ *
+ * renders specific headers based on user
+ * authentication
+ *
+ * @class Header
+ * @extends {React.Component}
+ */
 class Header extends React.Component {
+  /**
+   * logout a user by deleting the token from
+   * localStorage
+   *
+   * @memberof Header
+   */
   logout() {
     localStorage.removeItem("loggedInUser");
     window.location.reload();

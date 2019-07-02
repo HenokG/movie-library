@@ -3,12 +3,21 @@ import Form from "react-bootstrap/Form";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Movie from "./Movie";
 import MovieModal from "./MovieModal";
 import socketIOClient from "socket.io-client";
 
+/**
+ * MovieList component for rendering a list of movies
+ *
+ * @class MovieList
+ * @extends {Component}
+ */
 class MovieList extends Component {
+  /**
+   *Creates an instance of MovieList.
+   * @memberof MovieList
+   */
   constructor() {
     super();
 
@@ -25,6 +34,12 @@ class MovieList extends Component {
     };
   }
 
+  /**
+   * handle sorting after state is ready
+   *
+   * @param {*} nextProps
+   * @memberof MovieList
+   */
   componentWillReceiveProps(nextProps) {
     if (nextProps.movies !== this.props.movies) {
       this.setState({ movies: nextProps.movies }, () => {
@@ -35,12 +50,28 @@ class MovieList extends Component {
     }
   }
 
+  /**
+   * open add movie modal after setting
+   * modal title to 'add a movie'
+   *
+   * @memberof MovieList
+   */
   handleAddMovie() {
     this.movieModal.current.setTitle({ title: "Add a Movie" });
     this.movieModal.current.openAddModal();
   }
 
+  /**
+   * sort movieslist with user
+   *
+   * @param {*} event
+   * @memberof MovieList
+   */
   handleSort(event) {
+    /**
+     * get sorting index either from user event or
+     * previously saved index from localStorage
+     */
     const index = event ? event.target.value : localStorage.getItem("sort");
     const sortByTitleA = (a, b) => (a.title < b.title ? -1 : 1);
     const sortByTitleD = (a, b) => (a.title < b.title ? 1 : -1);
@@ -48,8 +79,6 @@ class MovieList extends Component {
     const sortByDurationD = (a, b) => (a.duration < b.duration ? 1 : -1);
 
     const sort = index => {
-      console.log("sorting with + ", index);
-
       if (index == 0) {
         this.setState({
           movies: this.state.movies.sort(sortByTitleA)
@@ -69,6 +98,7 @@ class MovieList extends Component {
       }
     };
     sort(index);
+    // save sorting index so users can get the same sorting when accessing the page again
     localStorage.setItem("sort", index);
   }
 

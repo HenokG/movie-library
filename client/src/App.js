@@ -1,18 +1,19 @@
 import React, { Component } from "react";
-import "./App.css";
-import Login from "./authentication/LogIn";
-import Layout from "./partials/Layout";
+import Header from "./partials/Header";
 
+/**
+ * App component
+ *
+ * @class App
+ * @extends {Component}
+ */
 class App extends Component {
-  constructor() {
-    super();
-  }
-
   render() {
     return (
-      <Layout>
-        <Login />
-      </Layout>
+      <>
+        <Header />
+        {this.props.children}
+      </>
     );
   }
 }

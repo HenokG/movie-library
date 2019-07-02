@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Layout from "../partials/Layout";
+import App from "../App";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import axios from "axios";
@@ -7,10 +7,22 @@ import Config from "../utils/config";
 import to from "../utils/to";
 import Auth from "./Auth";
 
+/**
+ * SignUp component for adding users
+ *
+ * @class SignUp
+ * @extends {Component}
+ */
 class SignUp extends Component {
+  /**
+   *Creates an instance of SignUp.
+   * @param {*} props
+   * @memberof SignUp
+   */
   constructor(props) {
     super(props);
 
+    // user authenticated?
     if (Auth.isAuthenticated()) props.history.push("/");
 
     this.handleInputChanges = this.handleInputChanges.bind(this);
@@ -21,10 +33,27 @@ class SignUp extends Component {
     };
   }
 
+  /**
+   * a single input change handler for all inputs which sets
+   * state based on the input's name and current value
+   *
+   * @param {*} event
+   * @memberof LogIn
+   */
   handleInputChanges(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
+  /**
+   * asynchronously send new user credentials to backend API
+   *
+   * if credentials are unique and valid server
+   * will send no errors, indicating we
+   * redirect to /login
+   *
+   * @param {*} event
+   * @memberof LogIn
+   */
   async handleSignUp(event) {
     event.preventDefault();
     const [error] = await to(
@@ -37,7 +66,7 @@ class SignUp extends Component {
 
   render() {
     return (
-      <Layout>
+      <App>
         <div className="d-flex justify-content-center">
           <Form className="m-5 mx-auto bg-white px-5 pb-3 pt-4">
             <h2> SignUp Form </h2>
@@ -82,7 +111,7 @@ class SignUp extends Component {
             </Button>
           </Form>
         </div>
-      </Layout>
+      </App>
     );
   }
 }
