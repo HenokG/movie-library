@@ -6,7 +6,6 @@ import Button from "react-bootstrap/Button";
 import Movie from "./Movie";
 import MovieModal from "./MovieModal";
 
-
 /**
  * MovieList component for rendering a list of movies
  *
@@ -49,7 +48,7 @@ class MovieList extends Component {
   }
 
   updateMovies({ movies }) {
-      this.setState({ movies: movies });
+    this.setState({ movies: movies });
   }
 
   /**

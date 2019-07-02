@@ -51,7 +51,7 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // console.log(err.stack);
+  console.log(err.stack);
   res.status(err.status || 400);
 
   res.json({

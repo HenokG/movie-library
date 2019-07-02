@@ -15,14 +15,12 @@ const customAxios = axios.create({
 
 // add token header to every request
 customAxios.interceptors.request.use(
-  function(config) {
+  config => {
     config.headers["token"] = Auth.getToken();
     return config;
   },
-  function(error) {
-    // Do something with request error
-    return Promise.reject(error);
-  }
+  // Do something with request error
+  error => Promise.reject(error)
 );
 
 export default customAxios;

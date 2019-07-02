@@ -38,6 +38,8 @@ class AllMovies extends Component {
    * when component mounts, if all movies haven't been
    * loaded before load them
    *
+   * and initiate socket connection for live feedback
+   *
    * @memberof AllMovies
    */
   componentDidMount() {
@@ -88,12 +90,12 @@ class AllMovies extends Component {
       <App>
         <Alert
           variant="info"
-          className="mt-3"
+          className="mt-3 col-sm-10 offset-sm-1 text-center col-md-4 offset-md-4"
           show={this.state.showPushNotification}
           dismissible
           onClose={this.handlePushNotificationToggle}
         >
-          <strong class="pr-5">notification</strong>
+          <strong className="pr-5">notification</strong>
           {this.state.notificationMessage}
         </Alert>
 

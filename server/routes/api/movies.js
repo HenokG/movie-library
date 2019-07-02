@@ -48,8 +48,8 @@ router.post("/", auth.required, async (req, res, next) => {
   // push notification to users for live feedback
   sendUpdateToUsers({
     messageToUsers: `${movie.title} has been Added!`,
-    req: req,
-    next: next
+    req,
+    next
   });
 
   return res.status(200).json({
@@ -76,13 +76,15 @@ router.put("/", auth.required, async (req, res, next) => {
   if (req.body.actors) {
     movie.actors = req.body.actors;
   }
-  movie.save();
+
+  const [err, saved] = await to(movie.save());
+  if (!saved) return next(err);
 
   // push notification to users for live feedback
   sendUpdateToUsers({
     messageToUsers: `${movie.title} has been Updated!`,
-    req: req,
-    next: next
+    req,
+    next
   });
 
   res.status(200).json({
@@ -100,8 +102,8 @@ router.patch("/", auth.required, async (req, res, next) => {
   // push notification to users for live feedback
   sendUpdateToUsers({
     messageToUsers: `${movie.title} has been Deleted!`,
-    req: req,
-    next: next
+    req,
+    next
   });
 
   res.status(200).json({
@@ -124,8 +126,8 @@ router.post("/share", auth.required, async (req, res, next) => {
     // push notification to users for live feedback
     sendUpdateToUsers({
       messageToUsers: `${movie.title} has been Shared!`,
-      req: req,
-      next: next
+      req,
+      next
     });
 
     res.status(200).json({ message: "successfully shared" });
@@ -158,8 +160,8 @@ router.post("/rate", auth.required, async (req, res, next) => {
     // push notification to users for live feedback
     sendUpdateToUsers({
       messageToUsers: `${movie.title} has been Rated!`,
-      req: req,
-      next: next
+      req,
+      next
     });
 
     res.status(200).json({ message: "successfully rated" });
@@ -193,24 +195,12 @@ const getMovies = async ({ filter, req, next }) => {
   );
   if (!movies) return next(error);
 
-  // calculate average rating for each movie
+  // for each movie, get reviews, check if previously rated, calculate average rating
   for (let i = 0; i < movies.length; i++) {
     const movie = movies[i];
     const [, ratings] = await to(Rate.find({ movie: movie._id }));
 
-    const reviews = [];
-    for (let i = 0; i < ratings.length; i++) {
-      const rating = ratings[i];
-      const [err, user] = await to(User.findById(rating.user));
-      if (!user) continue;
-      reviews.push({
-        rating: rating.rating,
-        comment: rating.comment,
-        username: user.username
-      });
-    }
-
-    movie.reviews = reviews;
+    [, movie.reviews] = await to(getReviewsOfAMovie({ ratings }));
 
     // already rated this movie?
     const alreadyRated = ratings.filter(rating => rating.user == req.user.id);
@@ -223,11 +213,43 @@ const getMovies = async ({ filter, req, next }) => {
   });
 };
 
+/**
+ * get reviews for a specific movie
+ * by going through each rating
+ * for that movie
+ *
+ * @param {object} { ratings }
+ * @returns {object[]} commulated reviews for a movie
+ */
+const getReviewsOfAMovie = async ({ ratings }) => {
+  const reviews = [];
+  for (let i = 0; i < ratings.length; i++) {
+    const rating = ratings[i];
+    const [, user] = await to(User.findById(rating.user));
+    if (!user) continue;
+    reviews.push({
+      rating: rating.rating,
+      comment: rating.comment,
+      username: user.username
+    });
+  }
+  return reviews;
+};
+
+/**
+ * send update to users for a live feedback experience
+ *
+ * live feedback is provided both for users
+ * on shared-movies page & all-movies page
+ *
+ * @param {object} { messageToUsers, req, next }, messageToUsers is a notification displayed on user devices
+ */
 const sendUpdateToUsers = async ({ messageToUsers, req, next }) => {
   const [, allMovies] = await to(getMovies({ req: req, next: next }));
 
   socketApi.sendForAllMovies({ message: messageToUsers, data: allMovies });
 
+  // filter out shared movies
   const sharedMovies = allMovies.filter(movie => movie.shared);
 
   socketApi.sendForSharedMovies({

@@ -78,7 +78,7 @@ class Movie extends Component {
     this.movieModal.current.setTitle({
       title: `Edit ${this.props.movie.title}`
     });
-    this.movieModal.current.openEditModal(this.props.movie._id);
+    this.movieModal.current.openEditModal({ movie: this.props.movie });
   }
 
   /**
@@ -100,7 +100,7 @@ class Movie extends Component {
    * asynchronously submit user review
    * including comment
    *
-   * if server response if OK
+   * if server response is OK
    * show notification
    *
    * @memberof Movie
@@ -159,7 +159,7 @@ class Movie extends Component {
           <ListGroup className="list-group-flush">
             <ListGroupItem>Release Date: {releaseDateFormatted}</ListGroupItem>
             <ListGroupItem>
-              Duration: {this.props.movie.duration} hrs
+              Duration: {this.props.movie.duration || "Unknown"} hrs
             </ListGroupItem>
             <ListGroupItem>
               Average Rating:

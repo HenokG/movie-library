@@ -84,10 +84,16 @@ class MovieModal extends Component {
    * @param {string} id
    * @memberof MovieModal
    */
-  openEditModal(id) {
+  openEditModal({ movie }) {
     this.setState({ method: "PUT" });
     this.handleToggle();
-    this.setState({ id: id });
+    this.setState({
+      id: movie._id,
+      title: movie.title,
+      duration: movie.duration,
+      releaseDate: movie.releaseDate,
+      actors: movie.actors
+    });
     this.notification.current.setTitle({ title: "Edited" });
   }
 

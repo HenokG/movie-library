@@ -27,7 +27,6 @@ import {
  *
  * @param {*} { component: Component, ...rest }
  */
-
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
     {...rest}

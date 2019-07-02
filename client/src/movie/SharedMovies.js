@@ -89,7 +89,7 @@ class SharedMovies extends Component {
       <App>
         <Alert
           variant="info"
-          className="mt-3 text-center"
+          className="mt-3 col-sm-10 text-center col-md-4 offset-md-4"
           show={this.state.showPushNotification}
           dismissible
           onClose={this.handlePushNotificationToggle}

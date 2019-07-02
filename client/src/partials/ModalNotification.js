@@ -21,7 +21,6 @@ class ModalNotification extends Component {
 
     this.handleNotificationToggle = this.handleNotificationToggle.bind(this);
     this.setTitle = this.setTitle.bind(this);
-    this.done = this.done.bind(this);
 
     this.state = {
       show: false,
@@ -48,17 +47,6 @@ class ModalNotification extends Component {
     this.setState({ show: !this.state.show });
   }
 
-  /**
-   * when user clicks done refresh page
-   * for updated data
-   *
-   * @memberof ModalNotification
-   */
-  done() {
-    this.setState({ show: !this.state.show });
-    // window.location.reload();
-  }
-
   render() {
     return (
       <Modal show={this.state.show} onHide={this.handleNotificationToggle}>
@@ -67,7 +55,7 @@ class ModalNotification extends Component {
         </Modal.Header>
         <Modal.Body>&#10004; Completed Successfully!</Modal.Body>
         <Modal.Footer className="justify-content-center">
-          <Button variant="primary" onClick={this.done}>
+          <Button variant="primary" onClick={this.handleNotificationToggle}>
             Done
           </Button>
         </Modal.Footer>

@@ -4,7 +4,7 @@ This is the API server
 
 ## How To Run
 
-**Inside this folder**
+Inside this folder
 
 ### `npm install`
 

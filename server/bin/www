@@ -7,6 +7,7 @@
 var app = require("../app");
 var debug = require("debug")("server:server");
 var http = require("http");
+var socketApi = require("../utils/socketApi");
 
 /**
  * Get port from environment and store in Express.
@@ -21,7 +22,9 @@ app.set("port", port);
 
 var server = http.createServer(app);
 
-var socketApi = require("../utils/socketApi");
+/**
+ * hook up socket.io
+ */
 var io = socketApi.io;
 io.attach(server);
 
