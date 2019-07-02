@@ -1,12 +1,19 @@
-## Available Scripts
+This project was bootstrapped with **Express Generator**<br>
 
-Run
+This is the API server
+
+## How To Run
+
+**Inside this folder**
 
 ### `npm install`
 
-installs dependencies<br>
+to install dependencies and
 
 ### `npm run dev`
 
-Runs the app in development mode.<br>
-(http://localhost:3000)
+Runs the app in the development mode.
+
+### `npm test`
+
+Launches the test runner **Jasmine** and runs through the unit tests.<br>

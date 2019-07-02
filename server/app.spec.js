@@ -15,11 +15,14 @@ describe("Server:", () => {
   describe("GET /movies", () => {
     var data = {};
     beforeAll(done => {
-      Request.get("http://localhost:3001/movies", (error, response, body) => {
-        data.status = response.statusCode;
-        data.body = body;
-        done();
-      });
+      Request.get(
+        "http://localhost:3000/api/movies",
+        (error, response, body) => {
+          data.status = response.statusCode;
+          data.body = body;
+          done();
+        }
+      );
     });
     it("should not have a status code of 200", () => {
       expect(data.status).not.toBe(200);
@@ -33,7 +36,7 @@ describe("Server:", () => {
     beforeAll(done => {
       Request.post(
         {
-          url: "http://localhost:3001/users/signup",
+          url: "http://localhost:3000/api/users/signup",
           form: {
             email: "henok@gmail.com",
             password: "admin"
@@ -47,7 +50,7 @@ describe("Server:", () => {
       );
     });
     it("should reject with status code of 500", () => {
-      expect(data.status).toBe(500);
+      expect(data.status).not.toBe(200);
     });
     it("should respond with 'username: can't be blank'", () => {
       expect(JSON.stringify(data.body)).toContain("username: can't be blank");
